@@ -1,0 +1,18 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+@layer components {
+
+
+.essence {
+    @apply bg-red-500
+}
+
+header {
+    @apply text-green-500
+}
+}
+

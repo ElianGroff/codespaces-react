@@ -1,29 +1,53 @@
-import './App.css';
+
+//@import { container, essence, page } from './components/index.js'
+import React, { useState } from "react";
 
 function App() {
+  const [isHovered, setIsHovered] = useState(false);
+  const [position, setPosition] = useState({ x: 50, y: 50 });
+
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData('text/plain', JSON.stringify(position));
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setPosition({
+      x: e.clientX,
+      y: e.clientY,
+    });
+    setIsHovered(false);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src="Octocat.png" className="App-logo" alt="logo" />
-        <p>
-          GitHub Codespaces <span className="heart">♥️</span> React
-        </p>
-        <p className="small">
-          Edit <code>src/App.jsx</code> and save to reload.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </p>
-      </header>
-    </div>
+    <>
+      <div
+        className={`relative w-[400px] h-[400px] mx-auto mt-10 border-2 ${ 
+          isHovered ? "border-blue-500" : "border-black"
+        }`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsHovered(true);
+        }}
+        onDragLeave={() => setIsHovered(false)}
+        onDrop={handleDrop}
+      >
+      </div>
+
+      <div
+        className="absolute w-[50px] h-[50px] bg-red-500 cursor-grab"
+        style={{
+          top: `${position.y}px`,
+          left: `${position.x}px`,
+        }}
+        draggable="true"
+        onDragStart={handleDragStart}
+      ></div>
+
+    </>
   );
 }
 
 export default App;
+
+ 
