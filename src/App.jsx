@@ -1,50 +1,84 @@
 
 //@import { container, essence, page } from './components/index.js'
 import React, { useState } from "react";
+import { Item, Group } from "./components";
+
+
+const MOCK_LOAD = {
+  groups: [
+    {
+      id: "container1",
+      name: "Container One",
+      position: { x: 100, y: 100 },
+      size: { x: 200, y: 200 },
+      items: [
+        {
+          name: "essenceONE",
+          position: { x: 20, y: 20 },
+          size: { x: 40, y: 40 },
+        },
+      ],
+      groups: [], // Nested containers
+    },
+  ],
+};
 
 function App() {
-  const [isHovered, setIsHovered] = useState(false);
-  const [position, setPosition] = useState({ x: 50, y: 50 });
+  //*const [isHovered, setIsHovered] = useState(false);
+  //?const [position, setPosition] = useState({ x: 50, y: 50 });
+  const [groups, setGroups] = useState(MOCK_LOAD.groups)
 
-  const handleDragStart = (e) => {
-    e.dataTransfer.setData('text/plain', JSON.stringify(position));
-  };
+  const updateGroup = (path, updateFn) => {
+    setGroups((prevGroups) => 
+      prevGroups.map((group) => 
+        group.path === path 
+          ? {
+            ...group,
+            ...updateFn(group),
+          }
+        : group
+      ))
+  }
 
-  const handleDrop = (e) => {
+
+  const handleDropItem = (itemPath, groupId, newPosition) => {
+    console.log(itemPath, groupId, newPosition)
+    updateGroup(groupId, (group) => ({
+      items: group.items.map((item) =>
+      item.path === itemPath
+        ? { ...item, position: newPosition }
+        : item
+    ),
+    }))
+  }
+
+  const handleDropGroup = (childGroupPath, parentGroupPath, newPosition) => {
+    console.log('HANDLE DROP GROUP:', childGroupPath, parentGroupPath, newPosition)
+  }
+
+  const handleDropAreaDrop = (e) => {
     e.preventDefault();
-    setPosition({
-      x: e.clientX,
-      y: e.clientY,
-    });
-    setIsHovered(false);
+    const name = e.dataTransfer.getData("text/plain");
+    console.log(name)
+    const newPosition = {
+      x: e.clientX - 25,
+      y: e.clientY - 25,
+    };
+    handleDrop(name, newPosition);
   };
 
   return (
-    <>
-      <div
-        className={`relative w-[400px] h-[400px] mx-auto mt-10 border-2 ${ 
-          isHovered ? "border-blue-500" : "border-black"
-        }`}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsHovered(true);
-        }}
-        onDragLeave={() => setIsHovered(false)}
-        onDrop={handleDrop}
-      >
-      </div>
-
-      <div
-        className="absolute w-[50px] h-[50px] bg-red-500 cursor-grab"
-        style={{
-          top: `${position.y}px`,
-          left: `${position.x}px`,
-        }}
-        draggable="true"
-        onDragStart={handleDragStart}
-      ></div>
-
-    </>
+    <main
+      className="bg-gray-200 absolute top-0 right-0 left-0 bottom-0">
+      {groups.map((group) => (
+        <Group
+          key={group.name}
+          {...group}
+          onDropItem={handleDropItem}
+          onDropGroup={handleDropGroup}
+          />
+      ))}
+    </main>
   );
 }
 
